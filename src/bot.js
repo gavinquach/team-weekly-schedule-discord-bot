@@ -171,7 +171,7 @@ createMessage = async () => {
                 { name: 'Saturday', value: list6, inline: true },
                 { name: 'Sunday', value: list7, inline: true },
                 { name: '\u200B', value: '\u200B' },
-                { name: "Haven't reacted:", value: unknownList },
+                { name: "Haven't reacted  😡:", value: unknownList },
             )
             .setTimestamp()
         // .setFooter('')
