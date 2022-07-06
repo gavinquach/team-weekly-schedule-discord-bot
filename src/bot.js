@@ -98,6 +98,31 @@ getNAList = () => {
     return temp;
 }
 
+getReactedList = () => {
+    reactEmbedMessage.embeds.forEach((embed) => {
+        let fields = embed.fields;
+        let i = 0;
+        fields.forEach(field => {
+            if (i > 6) return;
+            if (field.value != "None") {
+                const playerIDs = field.value.replace('<@', '').replace('>', '').split('\n');
+                const players = [];
+                playerIDs.forEach(id => {
+                    for (let i = 0; i < playerList.length; i++) {
+                        const p = playerList[i];
+                        if (id == p.id) {
+                            players.push(p);
+                            break;
+                        }
+                    }
+                });
+                playerLists.set(reactionList[i], players);
+            }
+            i++;
+        });
+    });
+}
+
 createMessage = async () => {
     const testChannel = bot.channels.cache.find(channel => channel.id === testChannelID);
     const channel = bot.channels.cache.find(channel => channel.id === reactChannelID);
@@ -233,7 +258,8 @@ bot.on('ready', async () => {
         // const testChannel = bot.channels.cache.find(channel => channel.id === testChannelID);
         // testChannel.send("Can't find react message!");
     }
-    getPlayerList();
+    await getPlayerList();
+    await getReactedList();
 });
 
 bot.on('messageReactionAdd', async (reaction, user) => {
@@ -308,6 +334,7 @@ bot.on("messageCreate", async message => {
     const testChannel = bot.channels.cache.find(channel => channel.id === testChannelID);
 
     if (message.channel == testChannel) {
+        let list = "";
         switch (message.content.toLowerCase()) {
             case "!hello":
                 testChannel
@@ -328,10 +355,22 @@ bot.on("messageCreate", async message => {
                 }
                 break;
             case "!getplayers":
-                console.log(playerList);
-                list = "";
-                playerList.forEach(player => list += player.username + ', ');
-                testChannel.send('Players: ' + list);
+                list = "Players: ";
+                playerList.forEach(player => {
+                    list += player.username + ', ';
+                });
+                testChannel.send(list);
+                break;
+            case "!getschedule":
+                list = "Schedule:\n";
+                playerLists.forEach((pList, day) => {
+                    list += `${day}: `;
+                    pList.forEach(player => {
+                        list += player.username + ', ';
+                    });
+                    list += '\n';
+                });
+                testChannel.send(list);
                 break;
         }
     }
