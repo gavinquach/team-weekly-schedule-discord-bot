@@ -35,15 +35,6 @@ let playerList = [];
 let naList = [];
 let reactionList = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣']
 
-const reactSlots = new Map();
-reactSlots.set('1️⃣', "Monday");
-reactSlots.set('2️⃣', "Tuesday");
-reactSlots.set('3️⃣', "Wednesday");
-reactSlots.set('4️⃣', "Thursday");
-reactSlots.set('5️⃣', "Friday");
-reactSlots.set('6️⃣', "Saturday");
-reactSlots.set('7️⃣', "Sunday");
-
 const playerLists = new Map();
 playerLists.set('1️⃣', []);
 playerLists.set('2️⃣', []);
@@ -205,8 +196,8 @@ postSchedule = async () => {
         message = await channel.send({ embeds: [embedMessage] });
 
         // add reactions
-        reactSlots.forEach((v, k) => {
-            message.react(k);
+        reactionList.forEach(emoji => {
+            message.react(emoji);
         });
         reactMessage = message;
     } catch (e) {
