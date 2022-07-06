@@ -125,17 +125,13 @@ createMessage = async () => {
             let temp = "None";
             if (playerList.length > 0) {
                 temp = "";
-                // console.log('reactionList[i - 1]: ' + reactionList[i - 1]);
                 if (day == reactionList[i - 1]) {
-                    console.log('day: ' + day);
                     playerList.forEach(player => {
-                        console.log('added ' + player.username);
                         if (temp.length > 0) temp += ', ';
                         temp += '<@' + player + '>';
                     });
                 }
             }
-            console.log(i + ' ' + temp);
             switch (i) {
                 case 1:
                     list1 = temp;
