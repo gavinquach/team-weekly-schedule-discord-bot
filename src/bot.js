@@ -22,7 +22,7 @@ const { CronJob } = require("cron");
 
 // reset weekly schedule at 00:00 every Monday
 const resetSchedule = new CronJob("0 0 * * 1", () => {
-    resetScheduleMessage();
+    postSchedule();
 });
 resetSchedule.start();
 
