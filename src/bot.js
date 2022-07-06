@@ -277,7 +277,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 
     const temp = await playerLists.get(reaction.emoji.name);
     temp.push(user);
-    playerLists.set(reaction.emoji, temp);
+    playerLists.set(reaction.emoji.name, temp);
     checkReactions();
 });
 
@@ -313,7 +313,7 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     const index = temp.indexOf(user);
     if (index > -1) temp.splice(index, 1);
 
-    playerLists.set(reaction.emoji, temp);
+    playerLists.set(reaction.emoji.name, temp);
     checkReactions();
 });
 
