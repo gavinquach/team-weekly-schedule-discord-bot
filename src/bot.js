@@ -29,7 +29,7 @@ resetSchedule.start();
 // import MessageEmbed module for embedding message
 const { MessageEmbed } = require('discord.js');
 
-let reactMessage = null;
+let reactEmbedMessage = null;
 
 let playerList = [];
 let naList = [];
@@ -199,7 +199,7 @@ postSchedule = async () => {
         reactionList.forEach(emoji => {
             message.react(emoji);
         });
-        reactMessage = message;
+        reactEmbedMessage = message;
     } catch (e) {
         await testChannel.send(`Error encountered when posting react message in ${channel.name}: ${e}`);
     }
@@ -210,7 +210,7 @@ checkReactions = async () => {
     const channel = bot.channels.cache.find(channel => channel.id === reactChannelID);
 
     try {
-        await reactMessage.edit({ embeds: [await createMessage()] });
+        await reactEmbedMessage.edit({ embeds: [await createMessage()] });
     } catch (e) {
         await testChannel.send(`Error encountered when editing react message in ${channel.name}: ${e}`);
     }
@@ -224,11 +224,11 @@ bot.on('ready', async () => {
     const channel = bot.channels.cache.find(channel => channel.id === reactChannelID);
     await channel.messages.fetch({ limit: 1 }).then(messages => {
         messages.forEach(message => {
-            reactMessage = message;
+            reactEmbedMessage = message;
         });
     });
 
-    if (!reactMessage) {
+    if (!reactEmbedMessage) {
         console.log("Can't find react message!");
         // const testChannel = bot.channels.cache.find(channel => channel.id === testChannelID);
         // testChannel.send("Can't find react message!");
@@ -242,7 +242,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     if (reactedMessage.channelId != reactChannelID)
         return;
 
-    if (reaction.message != reactMessage)
+    if (reaction.message != reactEmbedMessage)
         return;
 
     // When a reaction is received, check if the structure is partial
@@ -276,7 +276,7 @@ bot.on('messageReactionRemove', async (reaction, user) => {
         return;
     }
 
-    if (reaction.message != reactMessage)
+    if (reaction.message != reactEmbedMessage)
         return;
 
     // When a reaction is received, check if the structure is partial
@@ -321,10 +321,10 @@ bot.on("messageCreate", async message => {
                 postSchedule();
                 break;
             case "!getreactmsg":
-                if (reactMessage == null) {
+                if (reactEmbedMessage == null) {
                     testChannel.send('null');
                 } else {
-                    testChannel.send('React message link: ' + reactMessage.url);
+                    testChannel.send('React message link: ' + reactEmbedMessage.url);
                 }
                 break;
             case "!getplayers":
