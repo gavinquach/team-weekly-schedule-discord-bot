@@ -118,7 +118,7 @@ createMessage = async () => {
                 temp = "";
                 if (day == reactionList[i - 1]) {
                     playerList.forEach(player => {
-                        if (temp.length > 0) temp += ', ';
+                        if (temp.length > 0) temp += '\n';
                         temp += '<@' + player + '>';
                     });
                 }
