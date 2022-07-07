@@ -262,6 +262,7 @@ checkReactions = async () => {
     const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
     const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
 
+    await getReactedList();
     try {
         await reactEmbedMessage.edit({ embeds: [await createMessage()] });
     } catch (e) {
@@ -289,7 +290,7 @@ bot.on('ready', async () => {
         // const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
         // testChannel.send("Can't find react message!");
     }
-    await getPlayerList();
+    await checkReactions();
     await getReactedList();
 });
 
@@ -353,10 +354,10 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     if (author === user)
         return;
 
-    let temp = await playerLists.get(reaction.emoji.name);
-    const index = temp.indexOf(user);
-    if (index > -1) temp.splice(index, 1);
-    playerLists.set(reaction.emoji.name, temp);
+    // let temp = await playerLists.get(reaction.emoji.name);
+    // const index = temp.indexOf(user);
+    // if (index > -1) temp.splice(index, 1);
+    // playerLists.set(reaction.emoji.name, temp);
     await checkReactions();
 });
 
