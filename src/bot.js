@@ -203,7 +203,7 @@ createMessage = async () => {
 
         return new MessageEmbed()
             .setColor('#00FFF2')
-            .setTitle('<:amogus:976717839358644224> React to set your weekly availability <:amogus:976717839358644224>')
+            .setTitle('React to set your weekly availability')
             .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\nCompletely unavailable = ❌```")
             .addFields(
                 { name: 'Monday', value: list1, inline: true },
