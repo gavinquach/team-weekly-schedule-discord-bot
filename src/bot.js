@@ -16,7 +16,7 @@ bot.login(process.env.DISCORDJS_BOT_TOKEN);
 const serverID = "922521154583941230";
 const testChannelID = "994194410705276988";
 const reactChannelID = "994194464618856468";
-const teamRoleID = "922524439621566554";
+const teamRoleID = "925129571764932639";
 
 const { CronJob } = require("cron");
 
