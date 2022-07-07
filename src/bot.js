@@ -290,8 +290,8 @@ bot.on('ready', async () => {
         // const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
         // testChannel.send("Can't find react message!");
     }
+    await getPlayerList();
     await checkReactions();
-    await getReactedList();
 });
 
 bot.on('messageReactionAdd', async (reaction, user) => {
