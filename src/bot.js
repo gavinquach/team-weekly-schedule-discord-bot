@@ -158,7 +158,7 @@ createMessage = async () => {
         });
 
         let list1 = list2 = list3 = list4 = list5 = list6 = list7 = "";
-        let unavailableList = [];
+        let unavailableListStr = "";
 
         let i = 1;
         playerLists.forEach((plist, day) => {
@@ -177,8 +177,6 @@ createMessage = async () => {
                         if (index > -1) {
                             naList.splice(index, 1);
                         }
-                        if (day == '❌')
-                            unavailableList.push(player);
                     });
                 }
             }
@@ -204,20 +202,11 @@ createMessage = async () => {
                 case 7:
                     list7 = temp;
                     break;
+                case 8:
+                    unavailableListStr = temp;
+                    break;
             }
             i++;
-        });
-
-        let unavailableListStr = "";
-        if (unavailableList.length <= 0) {
-            unavailableListStr = "None";
-        }
-        unavailableList.forEach(player => {
-            unavailableListStr += '<@' + player + '>';
-            if (subList.includes(player)) {
-                unavailableListStr += ' (S)';
-            }
-            unavailableListStr += '\n';
         });
 
         return new MessageEmbed()
@@ -233,7 +222,7 @@ createMessage = async () => {
                 { name: 'Saturday', value: list6, inline: true },
                 { name: 'Sunday', value: list7, inline: true },
                 { name: '\u200B', value: '\u200B' },
-                { name: "Unavailable:", value: unavailableListStr, inline: true },
+                { name: "Completely unavailable:", value: unavailableListStr, inline: true },
                 { name: "Haven't reacted  😡:", value: unknownList, inline: true },
             )
             .setTimestamp()
