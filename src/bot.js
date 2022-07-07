@@ -38,7 +38,7 @@ let reactEmbedMessage = null;
 let mainList = [];
 let subList = [];
 let naList = [];
-let reactionList = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣']
+let reactionList = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '❌']
 
 const playerLists = new Map();
 playerLists.set('1️⃣', []);
@@ -48,12 +48,14 @@ playerLists.set('4️⃣', []);
 playerLists.set('5️⃣', []);
 playerLists.set('6️⃣', []);
 playerLists.set('7️⃣', []);
+playerLists.set('❌', []);
 
 // =============================================== //
 // ================== FUNCTIONS ================== //
 // =============================================== //
 resetAllVars = () => {
     mainList = [];
+    subList = [];
     playerLists.set('1️⃣', []);
     playerLists.set('2️⃣', []);
     playerLists.set('3️⃣', []);
@@ -61,6 +63,7 @@ resetAllVars = () => {
     playerLists.set('5️⃣', []);
     playerLists.set('6️⃣', []);
     playerLists.set('7️⃣', []);
+    playerLists.set('❌', []);
 }
 
 getPlayerList = async () => {
@@ -77,16 +80,9 @@ getPlayerList = async () => {
     members.forEach(member => {
         if (member._roles.includes(config['mainTeamRoleID'])) {
             mainList.push(member.user);
-        } else if (member._roles.includes(config['subTeamRoleID'])) {
+        } else if (!member._roles.includes(config['mainTeamRoleID']) && member._roles.includes(config['subTeamRoleID'])) {
             subList.push(member.user);
         }
-        // member._roles.forEach(roleid => {
-        //     if (roleid == config['mainTeamRoleID']) {
-        //         mainList.push(member.user);
-        //     } else if (roleid == config['subTeamRoleID']) {
-        //         subList.push(member.user);
-        //     }
-        // });
     });
 
     // print player list for debug
@@ -106,6 +102,11 @@ isAvailable = (teammate) => {
 getNAList = () => {
     let temp = [];
     mainList.forEach(player => {
+        if (!isAvailable(player)) {
+            temp.push(player);
+        }
+    });
+    subList.forEach(player => {
         if (!isAvailable(player)) {
             temp.push(player);
         }
@@ -146,20 +147,38 @@ createMessage = async () => {
     // await naList.forEach(p => console.log(p.username + ", "));
 
     try {
-        unknownList = "";
-        await naList.forEach(player => unknownList += '<@' + player + '>\n');
 
-        list1 = list2 = list3 = list4 = list5 = list6 = list7 = "";
+        let unknownList = "";
+        await naList.forEach(player => {
+            unknownList += '<@' + player + '>';
+            if (subList.includes(player)) {
+                unknownList += ' (S)';
+            }
+            unknownList += '\n';
+        });
+
+        let list1 = list2 = list3 = list4 = list5 = list6 = list7 = "";
+        let unavailableList = [];
 
         let i = 1;
-        playerLists.forEach((mainList, day) => {
+        playerLists.forEach((plist, day) => {
             let temp = "None";
-            if (mainList.length > 0) {
+            if (plist.length > 0) {
                 temp = "";
                 if (day == reactionList[i - 1]) {
-                    mainList.forEach(player => {
-                        if (temp.length > 0) temp += '\n';
+                    plist.forEach(player => {
                         temp += '<@' + player + '>';
+                        if (subList.includes(player)) {
+                            temp += ' (S)';
+                        }
+                        temp += '\n';
+
+                        const index = naList.indexOf(player);
+                        if (index > -1) {
+                            naList.splice(index, 1);
+                        }
+                        if (day == '❌')
+                            unavailableList.push(player);
                     });
                 }
             }
@@ -189,10 +208,22 @@ createMessage = async () => {
             i++;
         });
 
+        let unavailableListStr = "";
+        if (unavailableList.length <= 0) {
+            unavailableListStr = "None";
+        }
+        unavailableList.forEach(player => {
+            unavailableListStr += '<@' + player + '>';
+            if (subList.includes(player)) {
+                unavailableListStr += ' (S)';
+            }
+            unavailableListStr += '\n';
+        });
+
         return new MessageEmbed()
             .setColor('#00FFF2')
             .setTitle('<:amogus:976717839358644224> React to set your weekly availability <:amogus:976717839358644224>')
-            .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\n```")
+            .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\nCompletely unavailable = ❌```")
             .addFields(
                 { name: 'Monday', value: list1, inline: true },
                 { name: 'Tuesday', value: list2, inline: true },
@@ -202,7 +233,8 @@ createMessage = async () => {
                 { name: 'Saturday', value: list6, inline: true },
                 { name: 'Sunday', value: list7, inline: true },
                 { name: '\u200B', value: '\u200B' },
-                { name: "Haven't reacted  😡:", value: unknownList },
+                { name: "Unavailable:", value: unavailableListStr, inline: true },
+                { name: "Haven't reacted  😡:", value: unknownList, inline: true },
             )
             .setTimestamp()
         // .setFooter('')
