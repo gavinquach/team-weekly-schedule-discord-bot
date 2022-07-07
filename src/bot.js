@@ -405,8 +405,18 @@ bot.on("messageCreate", async message => {
                 break;
             case "!getschedule":
                 list = "Schedule:\n";
+                const weekDay = new Map();
+                weekDay.set('1️⃣', "Monday");
+                weekDay.set('2️⃣', "Tuesday");
+                weekDay.set('3️⃣', "Wednesday");
+                weekDay.set('4️⃣', "Thursday");
+                weekDay.set('5️⃣', "Friday");
+                weekDay.set('6️⃣', "Saturday");
+                weekDay.set('7️⃣', "Sunday");
+                weekDay.set('❌', "Unavailable");
+
                 playerLists.forEach((pList, day) => {
-                    list += `${day}: `;
+                    list += `**${weekDay.get(day)}**: `;
                     pList.forEach(player => {
                         list += player.username + ', ';
                     });
