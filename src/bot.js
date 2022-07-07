@@ -322,7 +322,7 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     const temp = await playerLists.get(reaction.emoji.name);
     temp.push(user);
     playerLists.set(reaction.emoji.name, temp);
-    checkReactions();
+    await checkReactions();
 });
 
 bot.on('messageReactionRemove', async (reaction, user) => {
@@ -356,9 +356,8 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     let temp = await playerLists.get(reaction.emoji.name);
     const index = temp.indexOf(user);
     if (index > -1) temp.splice(index, 1);
-
     playerLists.set(reaction.emoji.name, temp);
-    checkReactions();
+    await checkReactions();
 });
 
 bot.on("messageCreate", async message => {
@@ -386,6 +385,9 @@ bot.on("messageCreate", async message => {
                     testChannel.send('React message link: ' + reactEmbedMessage.url);
                 }
                 break;
+            case "!checkreactions":
+                await checkReactions();
+                break;
             case "!getmain":
                 list = "Main roster players: ";
                 mainList.forEach(player => {
@@ -410,6 +412,9 @@ bot.on("messageCreate", async message => {
                     list += '\n';
                 });
                 testChannel.send(list);
+                break;
+            case "!commands":
+                testChannel.send("Commands: !hello, !postreact, !getreactmsg, !checkreactions, !getmain, !getsub, !getschedule");
                 break;
         }
     }
