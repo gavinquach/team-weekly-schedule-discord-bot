@@ -114,29 +114,21 @@ getNAList = () => {
     return temp;
 }
 
-getReactedList = () => {
-    reactEmbedMessage.embeds.forEach((embed) => {
-        let fields = embed.fields;
-        let i = 0;
-        fields.forEach(field => {
-            if (i > 6) return;
-            if (field.value != "None") {
-                const playerIDs = field.value.replace('<@', '').replace('>', '').split('\n');
-                const players = [];
-                playerIDs.forEach(id => {
-                    for (let i = 0; i < mainList.length; i++) {
-                        const p = mainList[i];
-                        if (id == p.id) {
-                            players.push(p);
-                            break;
-                        }
-                    }
-                });
-                playerLists.set(reactionList[i], players);
+getReactedList = async () => {
+    const reactions = reactEmbedMessage.reactions;
+    for (let i = 0; i < reactionList.length; i++) {
+        const emoji = reactionList[i];
+        const reaction = reactions.resolve(emoji);
+        let reactedUsers = await reactions.resolve(emoji).users.fetch();
+
+        let temp = [];
+        await reactedUsers.forEach(user => {
+            if (reaction.message.author != user) {
+                temp.push(user);
             }
-            i++;
         });
-    });
+        playerLists.set(reaction.emoji.name, temp);
+    }
 }
 
 createMessage = async () => {
