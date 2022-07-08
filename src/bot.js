@@ -116,7 +116,7 @@ getNAList = () => {
 
 // get users in reacts and add them to the schedule list
 getReactedList = async () => {
-    if (reactEmbedMessage)
+    if (!reactEmbedMessage)
         return;
 
     const reactions = reactEmbedMessage.reactions;
