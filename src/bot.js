@@ -80,7 +80,7 @@ getPlayerList = async () => {
     members.forEach(member => {
         if (member._roles.includes(config['mainTeamRoleID'])) {
             mainList.push(member.user);
-        } else if (!member._roles.includes(config['mainTeamRoleID']) && member._roles.includes(config['subTeamRoleID'])) {
+        } else if (config['subTeamRoleID'].trim() != "" && (!member._roles.includes(config['mainTeamRoleID']) && member._roles.includes(config['subTeamRoleID']))) {
             subList.push(member.user);
         }
     });
