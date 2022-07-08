@@ -33,22 +33,22 @@ resetSchedule.start();
 // import MessageEmbed module for embedding message
 const { MessageEmbed } = require('discord.js');
 
+const unavailableEmoji = '❌';
 let reactEmbedMessage = null;
-
 let mainList = [];
 let subList = [];
 let naList = [];
-let reactionList = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '❌']
+let reactionList = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', unavailableEmoji]
 
-const playerLists = new Map();
-playerLists.set('1️⃣', []);
-playerLists.set('2️⃣', []);
-playerLists.set('3️⃣', []);
-playerLists.set('4️⃣', []);
-playerLists.set('5️⃣', []);
-playerLists.set('6️⃣', []);
-playerLists.set('7️⃣', []);
-playerLists.set('❌', []);
+const scheduleList = new Map();
+scheduleList.set('1️⃣', []);
+scheduleList.set('2️⃣', []);
+scheduleList.set('3️⃣', []);
+scheduleList.set('4️⃣', []);
+scheduleList.set('5️⃣', []);
+scheduleList.set('6️⃣', []);
+scheduleList.set('7️⃣', []);
+scheduleList.set(unavailableEmoji, []);
 
 // =============================================== //
 // ================== FUNCTIONS ================== //
@@ -56,14 +56,14 @@ playerLists.set('❌', []);
 resetAllVars = () => {
     mainList = [];
     subList = [];
-    playerLists.set('1️⃣', []);
-    playerLists.set('2️⃣', []);
-    playerLists.set('3️⃣', []);
-    playerLists.set('4️⃣', []);
-    playerLists.set('5️⃣', []);
-    playerLists.set('6️⃣', []);
-    playerLists.set('7️⃣', []);
-    playerLists.set('❌', []);
+    scheduleList.set('1️⃣', []);
+    scheduleList.set('2️⃣', []);
+    scheduleList.set('3️⃣', []);
+    scheduleList.set('4️⃣', []);
+    scheduleList.set('5️⃣', []);
+    scheduleList.set('6️⃣', []);
+    scheduleList.set('7️⃣', []);
+    scheduleList.set(unavailableEmoji, []);
 }
 
 getPlayerList = async () => {
@@ -91,7 +91,7 @@ getPlayerList = async () => {
 
 isAvailable = (teammate) => {
     let available = false;
-    playerLists.forEach((l) => {
+    scheduleList.forEach((l) => {
         if (l.length > 0 && l.includes(teammate)) {
             available = true;
         }
@@ -114,6 +114,7 @@ getNAList = () => {
     return temp;
 }
 
+// get users in reacts and add them to the schedule list
 getReactedList = async () => {
     const reactions = reactEmbedMessage.reactions;
     for (let i = 0; i < reactionList.length; i++) {
@@ -127,7 +128,7 @@ getReactedList = async () => {
                 temp.push(user);
             }
         });
-        playerLists.set(reaction.emoji.name, temp);
+        scheduleList.set(reaction.emoji.name, temp);
     }
 }
 
@@ -153,7 +154,7 @@ createMessage = async () => {
         let unavailableListStr = "";
 
         let i = 1;
-        playerLists.forEach((plist, day) => {
+        scheduleList.forEach((plist, day) => {
             let temp = "None";
             if (plist.length > 0) {
                 temp = "";
@@ -320,9 +321,9 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     if (author === user)
         return;
 
-    const temp = await playerLists.get(reaction.emoji.name);
-    temp.push(user);
-    playerLists.set(reaction.emoji.name, temp);
+    // const temp = await scheduleList.get(reaction.emoji.name);
+    // temp.push(user);
+    // scheduleList.set(reaction.emoji.name, temp);
     await checkReactions();
 });
 
@@ -354,10 +355,10 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     if (author === user)
         return;
 
-    // let temp = await playerLists.get(reaction.emoji.name);
+    // let temp = await scheduleList.get(reaction.emoji.name);
     // const index = temp.indexOf(user);
     // if (index > -1) temp.splice(index, 1);
-    // playerLists.set(reaction.emoji.name, temp);
+    // scheduleList.set(reaction.emoji.name, temp);
     await checkReactions();
 });
 
@@ -413,9 +414,9 @@ bot.on("messageCreate", async message => {
                 weekDay.set('5️⃣', "Friday");
                 weekDay.set('6️⃣', "Saturday");
                 weekDay.set('7️⃣', "Sunday");
-                weekDay.set('❌', "Unavailable");
+                weekDay.set(unavailableEmoji, "Unavailable");
 
-                playerLists.forEach((pList, day) => {
+                scheduleList.forEach((pList, day) => {
                     list += `**${weekDay.get(day)}**: `;
                     pList.forEach(player => {
                         list += player.username + ', ';
