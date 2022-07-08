@@ -288,9 +288,57 @@ checkReactions = async () => {
     }
 }
 
+checkTargetReaction = async (targetReaction, targetUser) => {
+    const targetEmoji = targetReaction.emoji.name;
+    if (targetEmoji == unavailableEmoji) {
+        const reactions = reactEmbedMessage.reactions;
+        for (let i = 0; i < reactionList.length; i++) {
+            const emoji = reactionList[i];
+            if (emoji != unavailableEmoji) {
+                const reaction = await reactions.resolve(emoji);
+                const reactedUsers = await reaction.users.fetch();
+                await reactedUsers.forEach(async u => {
+                    if (u.id == targetUser.id) {
+                        let temp = await scheduleList.get(targetEmoji);
+                        const index = temp.indexOf(targetUser);
+                        if (index > -1) temp.splice(index, 1);
+                        scheduleList.set(targetEmoji, temp);
+
+                        removedByBot = true;
+                        await reaction.users.remove(targetUser.id);
+                        return;
+                    }
+                });
+            }
+        }
+    } else {
+        const reactions = reactEmbedMessage.reactions;
+        for (let i = 0; i < reactionList.length; i++) {
+            const emoji = reactionList[i];
+            if (emoji == unavailableEmoji) {
+                const reaction = await reactions.resolve(emoji);
+                const reactedUsers = await reaction.users.fetch();
+                await reactedUsers.forEach(async u => {
+                    if (u.id == targetUser.id) {
+                        let temp = await scheduleList.get(targetEmoji);
+                        const index = temp.indexOf(targetUser);
+                        if (index > -1) temp.splice(index, 1);
+                        scheduleList.set(targetEmoji, temp);
+
+                        removedByBot = true;
+                        await reaction.users.remove(targetUser.id);
+                        return;
+                    }
+                });
+            }
+        }
+    }
+}
+
 // ========================================= //
 // ================== BOT ================== //
 // ========================================= //
+let removedByBot = false;
 bot.on('ready', async () => {
     console.log("Connected.");
     console.log("Logged in as " + bot.user.username + " (" + bot.user.id + ").");
@@ -337,6 +385,8 @@ bot.on('messageReactionAdd', async (reaction, user) => {
     if (reaction.message.author === user)
         return;
 
+    await checkTargetReaction(reaction, user);
+
     // const temp = await scheduleList.get(reaction.emoji.name);
     // temp.push(user);
     // scheduleList.set(reaction.emoji.name, temp);
@@ -344,6 +394,11 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 });
 
 bot.on('messageReactionRemove', async (reaction, user) => {
+    if (removedByBot) {
+        removedByBot = false;
+        return;
+    }
+
     // only do stuff when it's reaction from react channel
     let reactedMessage = await reaction.message.fetch();
     if (reactedMessage.channelId != config['reactChannelID'])
