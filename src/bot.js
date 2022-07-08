@@ -12,6 +12,15 @@ const bot = new Client({
     partials: ['USER', 'REACTION', 'MESSAGE', 'CHANNEL']
 });
 
+const { CronJob } = require("cron");
+// reset weekly schedule at 00:00 every Monday
+const resetSchedule = new CronJob("0 0 * * 1", () => {
+    postSchedule();
+});
+resetSchedule.start();
+
+// import MessageEmbed module for embedding message
+const { MessageEmbed } = require('discord.js');
 
 // ========================================== //
 // ================== INIT ================== //
@@ -23,15 +32,8 @@ let config = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
 // login to discord
 bot.login(config['discordBotToken']);
 
-const { CronJob } = require("cron");
-// reset weekly schedule at 00:00 every Monday
-const resetSchedule = new CronJob("0 0 * * 1", () => {
-    postSchedule();
-});
-resetSchedule.start();
-
-// import MessageEmbed module for embedding message
-const { MessageEmbed } = require('discord.js');
+let testChannel = null;
+let reactChannel = null;
 
 const unavailableEmoji = '❌';
 let reactEmbedMessage = null;
@@ -73,8 +75,7 @@ getPlayerList = async () => {
         const guild = await bot.guilds.fetch(config['serverID']);
         members = await guild.members.fetch();
     } catch (e) {
-        const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-        await testChannel.send(`Error encountered when getting player list in ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered when getting player list in ${reactChannel.name}: ${e}`);
     }
 
     members.forEach(member => {
@@ -121,9 +122,8 @@ getReactedList = async () => {
 
     const reactions = reactEmbedMessage.reactions;
     for (let i = 0; i < reactionList.length; i++) {
-        const emoji = reactionList[i];
-        const reaction = reactions.resolve(emoji);
-        let reactedUsers = await reactions.resolve(emoji).users.fetch();
+        const reaction = reactions.resolve(reactionList[i]);
+        const reactedUsers = await reaction.users.fetch();
 
         let temp = [];
         await reactedUsers.forEach(user => {
@@ -136,14 +136,11 @@ getReactedList = async () => {
 }
 
 createMessage = async () => {
-    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
 
     naList = await getNAList();
     // await naList.forEach(p => console.log(p.username + ", "));
 
     try {
-
         let unknownList = "";
         await naList.forEach(player => {
             unknownList += '<@' + player + '>';
@@ -241,7 +238,7 @@ createMessage = async () => {
             )
             .setTimestamp()
     } catch (e) {
-        await testChannel.send(`Error encountered when creating react message in ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered when creating react message in ${reactChannel.name}: ${e}`);
     }
 }
 
@@ -249,25 +246,22 @@ postSchedule = async () => {
     resetAllVars();
     await getPlayerList();
 
-    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
-
     embedMessage = await createMessage();
 
     try {
-        await channel.messages.fetch({ limit: 5 })
+        await reactChannel.messages.fetch({ limit: 5 })
             .then(messages => {
                 messages.forEach(message => {
                     message.delete();
                 });
             });
     } catch (e) {
-        await testChannel.send(`Error encountered while deleting react message in channel ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered while deleting react message in channel ${reactChannel.name}: ${e}`);
     }
 
     let message = null;
     try {
-        message = await channel.send({ embeds: [embedMessage] });
+        message = await reactChannel.send({ embeds: [embedMessage] });
 
         // add reactions
         reactionList.forEach(emoji => {
@@ -275,30 +269,24 @@ postSchedule = async () => {
         });
         reactEmbedMessage = message;
     } catch (e) {
-        await testChannel.send(`Error encountered when posting react message in ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered when posting react message in ${reactChannel.name}: ${e}`);
     }
 }
 
 editReactions = async () => {
-    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
-
     try {
         await reactEmbedMessage.edit({ embeds: [await createMessage()] });
     } catch (e) {
-        await testChannel.send(`Error encountered when editing react message in ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered when editing react message in ${reactChannel.name}: ${e}`);
     }
 }
 
 checkReactions = async () => {
-    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
-
     await getReactedList();
     try {
         await reactEmbedMessage.edit({ embeds: [await createMessage()] });
     } catch (e) {
-        await testChannel.send(`Error encountered when editing react message in ${channel.name}: ${e}`);
+        await testChannel.send(`Error encountered when editing react message in ${reactChannel.name}: ${e}`);
     }
 }
 
@@ -359,9 +347,11 @@ bot.on('ready', async () => {
     console.log("Connected.");
     console.log("Logged in as " + bot.user.username + " (" + bot.user.id + ").");
 
+    testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
+    reactChannel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
+    
     // get message sent by bot in the react channel
-    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
-    await channel.messages.fetch({ limit: 1 }).then(messages => {
+    await reactChannel.messages.fetch({ limit: 1 }).then(messages => {
         messages.forEach(message => {
             reactEmbedMessage = message;
         });
@@ -369,7 +359,6 @@ bot.on('ready', async () => {
 
     if (!reactEmbedMessage) {
         console.log("Can't find react message!");
-        // const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
         // testChannel.send("Can't find react message!");
     }
     await getPlayerList();
@@ -463,8 +452,6 @@ bot.on('messageReactionRemove', async (reaction, user) => {
 });
 
 bot.on("messageCreate", async message => {
-    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
-
     if (message.channel == testChannel) {
         let list = "";
         switch (message.content.toLowerCase()) {
