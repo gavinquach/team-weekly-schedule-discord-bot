@@ -136,7 +136,7 @@ createMessage = async () => {
     const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
     const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
 
-    naList = await getNAList();
+    const naList = await getNAList();
     // await naList.forEach(p => console.log(p.username + ", "));
 
     try {
@@ -202,6 +202,25 @@ createMessage = async () => {
             i++;
         });
 
+        if (naList.length > 0) {
+            return new MessageEmbed()
+                .setColor('#00FFF2')
+                .setTitle('React to set your weekly availability')
+                .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\nCompletely unavailable = ❌```")
+                .addFields(
+                    { name: 'Monday', value: list1, inline: true },
+                    { name: 'Tuesday', value: list2, inline: true },
+                    { name: 'Wednesday', value: list3, inline: true },
+                    { name: 'Thursday', value: list4, inline: true },
+                    { name: 'Friday', value: list5, inline: true },
+                    { name: 'Saturday', value: list6, inline: true },
+                    { name: 'Sunday', value: list7, inline: true },
+                    { name: '\u200B', value: '\u200B' },
+                    { name: "Completely unavailable:", value: unavailableListStr, inline: true },
+                    { name: "Haven't reacted  😡:", value: unknownList, inline: true },
+                )
+                .setTimestamp()
+        }
         return new MessageEmbed()
             .setColor('#00FFF2')
             .setTitle('React to set your weekly availability')
@@ -215,11 +234,9 @@ createMessage = async () => {
                 { name: 'Saturday', value: list6, inline: true },
                 { name: 'Sunday', value: list7, inline: true },
                 { name: '\u200B', value: '\u200B' },
-                { name: "Completely unavailable:", value: unavailableListStr, inline: true },
-                { name: "Haven't reacted  😡:", value: unknownList, inline: true },
+                { name: "Completely unavailable:", value: unavailableListStr, inline: true }
             )
             .setTimestamp()
-        // .setFooter('')
     } catch (e) {
         await testChannel.send(`Error encountered when creating react message in ${channel.name}: ${e}`);
     }
