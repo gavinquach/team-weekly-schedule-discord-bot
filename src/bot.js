@@ -116,6 +116,9 @@ getNAList = () => {
 
 // get users in reacts and add them to the schedule list
 getReactedList = async () => {
+    if (reactEmbedMessage)
+        return;
+
     const reactions = reactEmbedMessage.reactions;
     for (let i = 0; i < reactionList.length; i++) {
         const emoji = reactionList[i];
