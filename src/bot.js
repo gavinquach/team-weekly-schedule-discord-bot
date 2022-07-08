@@ -276,6 +276,17 @@ postSchedule = async () => {
     }
 }
 
+editReactions = async () => {
+    const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
+    const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
+
+    try {
+        await reactEmbedMessage.edit({ embeds: [await createMessage()] });
+    } catch (e) {
+        await testChannel.send(`Error encountered when editing react message in ${channel.name}: ${e}`);
+    }
+}
+
 checkReactions = async () => {
     const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
     const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
@@ -339,6 +350,8 @@ checkTargetReaction = async (targetReaction, targetUser) => {
 // ================== BOT ================== //
 // ========================================= //
 let removedByBot = false;
+let reactCheck = null;
+let reactCheckDelayTimer = 5000;
 bot.on('ready', async () => {
     console.log("Connected.");
     console.log("Logged in as " + bot.user.username + " (" + bot.user.id + ").");
@@ -387,10 +400,18 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 
     await checkTargetReaction(reaction, user);
 
-    // const temp = await scheduleList.get(reaction.emoji.name);
-    // temp.push(user);
-    // scheduleList.set(reaction.emoji.name, temp);
-    await checkReactions();
+    const temp = await scheduleList.get(reaction.emoji.name);
+    temp.push(user);
+    scheduleList.set(reaction.emoji.name, temp);
+    await editReactions();
+
+    if (reactCheck != null) {
+        clearTimeout(reactCheck);
+        reactCheck = null;
+    }
+    reactCheck = setTimeout(async () => {
+        checkReactions();
+    }, reactCheckDelayTimer);
 });
 
 bot.on('messageReactionRemove', async (reaction, user) => {
@@ -423,11 +444,19 @@ bot.on('messageReactionRemove', async (reaction, user) => {
     if (reaction.message.author === user)
         return;
 
-    // let temp = await scheduleList.get(reaction.emoji.name);
-    // const index = temp.indexOf(user);
-    // if (index > -1) temp.splice(index, 1);
-    // scheduleList.set(reaction.emoji.name, temp);
-    await checkReactions();
+    let temp = await scheduleList.get(reaction.emoji.name);
+    const index = temp.indexOf(user);
+    if (index > -1) temp.splice(index, 1);
+    scheduleList.set(reaction.emoji.name, temp);
+    await editReactions();
+
+    if (reactCheck != null) {
+        clearTimeout(reactCheck);
+        reactCheck = null;
+    }
+    reactCheck = setTimeout(async () => {
+        checkReactions();
+    }, reactCheckDelayTimer);
 });
 
 bot.on("messageCreate", async message => {
