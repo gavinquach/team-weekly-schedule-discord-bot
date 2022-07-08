@@ -136,7 +136,7 @@ createMessage = async () => {
     const testChannel = bot.channels.cache.find(channel => channel.id === config['testChannelID']);
     const channel = bot.channels.cache.find(channel => channel.id === config['reactChannelID']);
 
-    const naList = await getNAList();
+    naList = await getNAList();
     // await naList.forEach(p => console.log(p.username + ", "));
 
     try {
