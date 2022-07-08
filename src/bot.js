@@ -326,16 +326,15 @@ bot.on('messageReactionAdd', async (reaction, user) => {
         // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
         try {
             await reaction.fetch();
-        } catch (error) {
-            console.error('Error encountered trying to fetch message: ', error);
+        } catch (e) {
+            console.error('Error encountered trying to fetch message: ', e);
             // Return as `reaction.message.author` may be undefined/null
             return;
         }
     }
 
     // check if the reaction is from the message's author
-    const author = reaction.message.author;
-    if (author === user)
+    if (reaction.message.author === user)
         return;
 
     // const temp = await scheduleList.get(reaction.emoji.name);
@@ -347,10 +346,8 @@ bot.on('messageReactionAdd', async (reaction, user) => {
 bot.on('messageReactionRemove', async (reaction, user) => {
     // only do stuff when it's reaction from react channel
     let reactedMessage = await reaction.message.fetch();
-    // console.log(reactedMessage.channelId);
-    if (reactedMessage.channelId != config['reactChannelID']) {
+    if (reactedMessage.channelId != config['reactChannelID'])
         return;
-    }
 
     if (reaction.message != reactEmbedMessage)
         return;
@@ -360,16 +357,15 @@ bot.on('messageReactionRemove', async (reaction, user) => {
         // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
         try {
             await reaction.fetch();
-        } catch (error) {
-            console.error('Error encountered trying to fetch message: ', error);
+        } catch (e) {
+            console.error('Error encountered trying to fetch message: ', e);
             // Return as `reaction.message.author` may be undefined/null
             return;
         }
     }
 
     // check if the reaction is from the message's author
-    const author = reaction.message.author;
-    if (author === user)
+    if (reaction.message.author === user)
         return;
 
     // let temp = await scheduleList.get(reaction.emoji.name);
