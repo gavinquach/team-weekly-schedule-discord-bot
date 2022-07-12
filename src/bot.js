@@ -204,7 +204,7 @@ createMessage = async () => {
 
         if (naList.length > 0) {
             return new MessageEmbed()
-                .setColor('#00FFF2')
+                .setColor(config['embed_color'])
                 .setTitle('React to set your weekly availability')
                 .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\nCompletely unavailable = ❌```")
                 .addFields(
@@ -222,7 +222,7 @@ createMessage = async () => {
                 .setTimestamp()
         }
         return new MessageEmbed()
-            .setColor('#00FFF2')
+            .setColor(config['embed_color'])
             .setTitle('React to set your weekly availability')
             .setDescription("```Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4\nFriday = 5, Saturday = 6, Sunday = 7\nCompletely unavailable = ❌```")
             .addFields(
